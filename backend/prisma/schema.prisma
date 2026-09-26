@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CampaignStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  PAUSED
+}
+
+enum EmailJobStatus {
+  SCHEDULED
+  SENDING
+  SENT
+  RESCHEDULED
+  FAILED
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  name             String?
+  avatarUrl        String?
+  googleId         String?           @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  campaigns        Campaign[]
+  senderAccounts   SenderAccount[]
+  slackIntegration SlackIntegration?
+
+  @@map("users")
+}
+
+model SenderAccount {
+  id          String     @id @default(cuid())
+  userId      String
+  email       String
+  name        String?
+  hourlyLimit Int        @default(50)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns   Campaign[]
+
+  @@unique([userId, email])
+  @@map("sender_accounts")
+}
+
+model Campaign {
+  id                         String         @id @default(cuid())
+  userId                     String
+  senderAccountId            String?
+  name                       String
+  subject                    String
+  body                       String         @db.Text
+  delayBetweenEmailsSeconds  Int            @default(0)
+  hourlyLimit                Int            @default(50)
+  scheduledStartTime         DateTime       @default(now())
+  status                     CampaignStatus @default(PENDING)
+  totalCount                 Int            @default(0)
+  sentCount                  Int            @default(0)
+  rescheduledCount           Int            @default(0)
+  failedCount                Int            @default(0)
+  attachments                Json?
+  createdAt                  DateTime       @default(now())
+  updatedAt                  DateTime       @updatedAt
+  user                       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  senderAccount              SenderAccount? @relation(fields: [senderAccountId], references: [id], onDelete: SetNull)
+  emailJobs                  EmailJob[]
+
+  @@index([userId, createdAt])
+  @@map("campaigns")
+}
+
+model EmailJob {
+  id                 String         @id @default(cuid())
+  campaignId         String
+  senderEmail        String
+  recipientEmail     String
+  subject            String
+  body               String         @db.Text
+  attachments        Json?
+  status             EmailJobStatus @default(SCHEDULED)
+  scheduledFor       DateTime
+  sentAt             DateTime?
+  rescheduledAt      DateTime?
+  attempts           Int            @default(0)
+  lastError          String?        @db.Text
+  etherealMessageId  String?
+  etherealPreviewUrl String?
+  isStarred          Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  campaign           Campaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, status])
+  @@index([senderEmail, status])
+  @@index([scheduledFor, status])
+  @@index([recipientEmail])
+  @@map("email_jobs")
+}
+
+model SlackIntegration {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  teamId            String
+  teamName          String?
+  channelId         String
+  channelName       String?
+  encryptedBotToken String   @db.Text
+  iv                String
+  authTag           String
+  isConnected       Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("slack_integrations")
+}
