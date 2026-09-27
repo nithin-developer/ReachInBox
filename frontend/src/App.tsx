@@ -1,21 +1,81 @@
-import { Button } from "@/components/ui/button"
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '@/context/auth-context';
+import { LoginPage } from '@/pages/LoginPage';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ScheduledEmailsPage } from '@/pages/ScheduledEmailsPage';
+import { SentEmailsPage } from '@/pages/SentEmailsPage';
+import { EmailDetailPage } from '@/pages/EmailDetailPage';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <div className="h-10 w-10 rounded-xl bg-[#009A49] flex items-center justify-center text-white font-heading font-black text-base shadow-sm animate-pulse">
+          RI
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Skeleton className="h-4 w-32" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicAuthRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard/scheduled" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 export function App() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
-  )
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              <PublicAuthRoute>
+                <LoginPage />
+              </PublicAuthRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/dashboard/scheduled" replace />} />
+            <Route path="scheduled" element={<ScheduledEmailsPage />} />
+            <Route path="sent" element={<SentEmailsPage />} />
+            <Route path="email/:emailId" element={<EmailDetailPage />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/dashboard/scheduled" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
