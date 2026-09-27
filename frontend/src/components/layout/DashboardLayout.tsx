@@ -187,7 +187,6 @@ export const DashboardLayout: React.FC = () => {
           onOpenCompose={() => setComposeOpen(true)}
           scheduledCount={metrics.scheduledCount}
           sentCount={metrics.sentCount}
-          searchSource={searchSource}
         />
 
         {/* Scrollable Page Content Area */}

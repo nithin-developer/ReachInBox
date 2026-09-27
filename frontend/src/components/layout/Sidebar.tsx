@@ -8,7 +8,6 @@ export interface SidebarProps {
   onOpenCompose: () => void;
   scheduledCount: number;
   sentCount: number;
-  searchSource: string | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -17,7 +16,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenCompose,
   scheduledCount,
   sentCount,
-  searchSource,
 }) => {
   return (
     <aside className="w-64 border-r border-border/70 p-4 flex flex-col justify-between shrink-0 bg-sidebar">
