@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useClickOutside } from '@/hooks/use-click-outside';
 import type { User, SlackIntegration } from '@/lib/api';
 import {
@@ -36,6 +37,10 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const userMenuRef = useClickOutside<HTMLDivElement>(() => setUserMenuOpen(false));
+
+  const queueDashboardUrl =
+    (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '') +
+    '/admin/queues';
 
   // Local state for immediate typing response
   const [localSearch, setLocalSearch] = useState(searchQuery);
@@ -104,8 +109,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Slack Status + Profile Dropdown */}
-      <div className="flex items-center gap-4">
+      {/* Right: Slack Status + Theme Switcher + Profile Dropdown */}
+      <div className="flex items-center gap-3">
         {/* Slack Integration Pill */}
         {slackStatus ? (
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs">
@@ -125,11 +130,14 @@ export const Header: React.FC<HeaderProps> = ({
           </Button>
         )}
 
+        {/* Theme Switcher Toggle */}
+        <ThemeToggle />
+
         {/* User Profile Dropdown */}
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className="flex items-center gap-2.5 p-1 rounded-full hover:bg-muted/70 transition-colors text-left focus:outline-none"
+            className="flex items-center gap-2.5 p-1 rounded-full hover:bg-muted/70 transition-colors text-left focus:outline-none cursor-pointer"
           >
             <img
               src={
@@ -160,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="py-1.5 space-y-0.5">
                 <a
-                  href="http://localhost:5000/admin/queues"
+                  href={queueDashboardUrl}
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setUserMenuOpen(false)}

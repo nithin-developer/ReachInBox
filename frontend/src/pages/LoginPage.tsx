@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { IconBolt } from '@tabler/icons-react';
 import GradientWaves from '@/components/LoginBG';
 
@@ -10,6 +11,11 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-background">
+      {/* Top-Right Theme Switcher */}
+      <div className="absolute top-5 right-5 z-20">
+        <ThemeToggle className="bg-card/85 backdrop-blur-md border-border/80 shadow-md" />
+      </div>
+
       {/* Background WebGL Shader Waves */}
       <div className="fixed inset-0 z-0 pointer-events-auto">
         <GradientWaves
