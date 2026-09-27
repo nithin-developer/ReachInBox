@@ -138,19 +138,6 @@ export const handleSlackCallback = async (code: string, userId: string) => {
           },
         },
         {
-          type: 'section',
-          fields: [
-            {
-              type: 'mrkdwn',
-              text: `*Status:*\nActive and Monitoring`,
-            },
-            {
-              type: 'mrkdwn',
-              text: `*Rescheduling Policy:*\nZero-Drop Distributed Sliding Window`,
-            },
-          ],
-        },
-        {
           type: 'context',
           elements: [
             {

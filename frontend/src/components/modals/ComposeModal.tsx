@@ -66,6 +66,32 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({
 
   const popoverRef = useClickOutside<HTMLDivElement>(() => setShowSendLater(false));
 
+  const resetForm = () => {
+    setSenderAccount(user.senderAccounts[0]?.email || user.email);
+    setRecipientInput('');
+    setRecipients([]);
+    setSubject('');
+    setBodyHtml('<p></p>');
+    setDelaySeconds(2);
+    setHourlyLimit(user.senderAccounts[0]?.hourlyLimit || 20);
+    setScheduledStartTime('');
+    setShowSendLater(false);
+    setCustomDateTime('');
+    setCsvFileName(null);
+    setAttachments([]);
+    if (csvInputRef.current) {
+      csvInputRef.current.value = '';
+    }
+    if (attachmentInputRef.current) {
+      attachmentInputRef.current.value = '';
+    }
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   // Download Sample CSV Helper
@@ -285,6 +311,7 @@ Elena,Rostova,elena.rostova@cloudscale.net,CloudScale`;
         `Successfully enqueued ${finalRecipients.length} emails with a ${delaySeconds}s delay.`,
         'success',
         () => {
+          resetForm();
           onScheduledSuccess();
           onClose();
         }
@@ -306,8 +333,8 @@ Elena,Rostova,elena.rostova@cloudscale.net,CloudScale`;
               Compose Campaign
             </h2>
             <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+              onClick={handleClose}
+              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none cursor-pointer"
             >
               <IconX className="h-5 w-5" />
             </button>
